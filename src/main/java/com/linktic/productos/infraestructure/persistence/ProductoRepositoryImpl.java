@@ -33,7 +33,7 @@ public class ProductoRepositoryImpl implements ProductoRepository {
     }
 
     private Producto toModel(final ProductoEntity entity) {
-        final Producto model = new Producto();
+        final Producto model = Producto.builder().build();
         BeanUtils.copyProperties(entity, model);
         return model;
     }

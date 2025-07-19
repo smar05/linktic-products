@@ -17,8 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final String ERROR_KEY = "error";
-
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         log.warn("Bad request: {}", ex.getMessage());
