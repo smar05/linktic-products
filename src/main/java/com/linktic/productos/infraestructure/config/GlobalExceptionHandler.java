@@ -1,7 +1,5 @@
 package com.linktic.productos.infraestructure.config;
 
-import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -9,8 +7,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.linktic.productos.domain.model.ErrorResponse;
+
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
 
+@Hidden
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -18,35 +20,35 @@ public class GlobalExceptionHandler {
     private static final String ERROR_KEY = "error";
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         log.warn("Bad request: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of(ERROR_KEY, ex.getMessage()));
+                .body(ErrorResponse.builder().error(ex.getMessage()).build());
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidJson(HttpMessageNotReadableException ex) {
+    public ResponseEntity<ErrorResponse> handleInvalidJson(HttpMessageNotReadableException ex) {
         log.warn("Malformed JSON: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of(ERROR_KEY, "JSON mal formado o incompleto"));
+                .body(ErrorResponse.builder().error("JSON mal formado o incompleto").build());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
         var firstError = ex.getBindingResult().getFieldError();
         String message = firstError != null ? firstError.getDefaultMessage() : "Error de validación";
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of(ERROR_KEY, message));
+                .body(ErrorResponse.builder().error(message).build());
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
         log.error("Error inesperado: ", ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of(ERROR_KEY, "Ocurrió un error inesperado"));
+                .body(ErrorResponse.builder().error("Ocurrió un error inesperado").build());
     }
 }
