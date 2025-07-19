@@ -15,15 +15,15 @@ import lombok.RequiredArgsConstructor;
 public class ProductoService {
     private final ProductoRepository repository;
 
-    public Producto crearProducto(final Producto producto) {
-        return repository.save(producto);
+    public Optional<Producto> crearProducto(final Producto producto) {
+        return Optional.ofNullable(repository.save(producto));
     }
 
     public Optional<Producto> obtenerProducto(final Long id) {
         return repository.findById(id);
     }
 
-    public List<Producto> listarProductos() {
-        return repository.findAll();
+    public Optional<List<Producto>> listarProductos() {
+        return Optional.ofNullable(repository.findAll());
     }
 }

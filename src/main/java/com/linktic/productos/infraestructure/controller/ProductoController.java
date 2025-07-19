@@ -1,7 +1,5 @@
 package com.linktic.productos.infraestructure.controller;
 
-import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.linktic.productos.application.service.ProductoService;
 import com.linktic.productos.domain.model.Producto;
+import com.linktic.productos.domain.model.Response;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,23 +22,25 @@ public class ProductoController {
     private final ProductoService productoService;
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> crear(@RequestBody final Producto producto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(jsonApiWrapper(productoService.crearProducto(producto)));
+    public ResponseEntity<Response> crear(@RequestBody final Producto producto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(jsonApiWrapper(productoService.crearProducto(producto)
+                .orElseThrow(() -> new IllegalArgumentException("Error al crear el producto"))));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> obtener(@PathVariable final Long id) {
+    public ResponseEntity<Response> obtener(@PathVariable final Long id) {
         return productoService.obtenerProducto(id)
                 .map(p -> ResponseEntity.ok(jsonApiWrapper(p)))
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con ID: " + id));
     }
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> listar() {
-        return ResponseEntity.ok(jsonApiWrapper(productoService.listarProductos()));
+    public ResponseEntity<Response> listar() {
+        return ResponseEntity.ok(jsonApiWrapper(productoService.listarProductos()
+                .orElseThrow(() -> new IllegalArgumentException("No se encontraron productos"))));
     }
 
-    private Map<String, Object> jsonApiWrapper(final Object data) {
-        return Map.of("data", data);
+    private Response jsonApiWrapper(final Object data) {
+        return Response.builder().data(data).build();
     }
 }
